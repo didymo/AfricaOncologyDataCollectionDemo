@@ -26,10 +26,12 @@ jobs:
       run: curl -sSL https://install.python-poetry.org | python3 -
 
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --with dev
 
-    - name: Run Pre-Commit Hooks
-      run: pre-commit run --all-files
+    - name: Initialize pre-commit
+      run: |
+        poetry run pre-commit install
+        poetry run pre-commit run --all-files
 
   test:
     needs: lint
