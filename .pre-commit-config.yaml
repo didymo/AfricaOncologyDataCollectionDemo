@@ -5,6 +5,10 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: check-ast  # Ensure Python files are syntactically correct
+      - id: detect-private-key  # Prevent committing private keys
+      - id: check-added-large-files  # Detect large files in the commit
+        args: ["--maxkb=500"]  # Set maximum file size in KB
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
@@ -17,3 +21,7 @@ repos:
     rev: 7.1.1
     hooks:
       - id: flake8
+  - repo: https://github.com/markdownlint/markdownlint
+    rev: v0.12.0
+    hooks:
+      - id: markdownlint  # Lint Markdown files like README.md
