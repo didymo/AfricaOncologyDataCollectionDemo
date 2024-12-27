@@ -1,6 +1,10 @@
-# src/tests/test_hello.py
+import os
 
-from app.gui.app import Application
+import pytest
+
+from src.app.gui.app import Application
+
+# from app.gui.app import Application
 
 
 def test_hello():
@@ -15,6 +19,10 @@ def test_basic_math():
     assert result == 2
 
 
+@pytest.mark.skipif(
+    os.environ.get("DISPLAY") is None,
+    reason="No display environment variable set",
+)
 def test_application_creation():
     """Test that we can create an Application instance"""
     app = Application()
