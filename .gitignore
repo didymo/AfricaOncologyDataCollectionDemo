@@ -169,3 +169,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# GitHub access token for use in the CD and testing
+gitaccesstoken.txt
+
+
+chatgptreport.txt
+notes.txt

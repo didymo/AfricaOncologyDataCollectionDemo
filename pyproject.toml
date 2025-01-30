@@ -6,8 +6,7 @@ authors = ["Ashley Maher <ashley.maher@didymodesigns.com.au>"]
 license = "GPL V3"
 readme = "README.md"
 packages = [
-    { include = "app", from = "src" },
-    { include = "tests", from = "src" }
+    { include = "app", from = "src" }
 ]
 
 [tool.poetry.dependencies]
@@ -27,6 +26,9 @@ tox = "^4.23.2"
 pre-commit = "^4.0.1"
 mypy = "^1.14.0"
 pytest-mock = "^3.14.0"
+safety = "^3.2.14"
+pip-audit = "^2.7.3"
+cyclonedx-python-lib = "<8"
 
 [build-system]
 requires = ["poetry-core"]

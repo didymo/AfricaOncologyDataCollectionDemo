@@ -4,8 +4,6 @@ import pytest
 
 from src.app.gui.app import Application
 
-# from app.gui.app import Application
-
 
 def test_hello():
     """Simple test to verify pytest is working"""

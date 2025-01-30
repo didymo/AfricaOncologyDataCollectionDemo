@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v5.0.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
@@ -8,13 +8,13 @@ repos:
       - id: check-ast  # Ensure Python files are syntactically correct
       - id: detect-private-key  # Prevent committing private keys
       - id: check-added-large-files  # Detect large files in the commit
-        args: ["--maxkb=500"]  # Set maximum file size in KB
+        args: [ "--maxkb=500" ]  # Set maximum file size in KB
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 25.1.0
     hooks:
       - id: black
   - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
+    rev: 6.0.0
     hooks:
       - id: isort
   - repo: https://github.com/pycqa/flake8
@@ -25,3 +25,20 @@ repos:
     rev: v0.12.0
     hooks:
       - id: markdownlint  # Lint Markdown files like README.md
+  ### safety is taking too long to get working
+  #  - repo: git@github.com:didymo/safety.git
+  #    rev: main  # Use the latest version from this repository
+  #    hooks:
+  #      - id: safety
+  #        args: [ "scan", "--full-report", "--file=poetry.lock" ]
+
+#  - repo: https://github.com/pypa/pip-audit
+#    rev: v2.7.3  # Latest version at the time of writing; check for updates
+#    hooks:
+#      - id: pip-audit
+#        args: ["--requirement", "requirements.txt" ]  # Change to "poetry.lock" if needed
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.7.3  # Latest version at the time of writing; check for updates
+    hooks:
+      - id: pip-audit
+        args: ["--path", "."]  # Change to "poetry.lock" if needed

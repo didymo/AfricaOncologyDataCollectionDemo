@@ -1,8 +1,10 @@
+import sys
 import tkinter as tk
 
 from src.app.gui.config_screen import ConfigScreen
 from src.app.gui.main_screen import MainScreen
 from src.app.utils.config import ConfigManager
+from src.app.utils.exceptions import ConfigurationError, DatabaseError
 from src.app.utils.logger import setup_logger
 from src.app.utils.setup import initialize_app
 
@@ -25,6 +27,7 @@ class MainApp(tk.Tk):
         except Exception as e:
             logger.warning(f"Initialization failed: {e}")
             # Show the configuration screen if initialization fails
+
             self.show_config_screen()
 
     def show_config_screen(self):
@@ -45,5 +48,14 @@ class MainApp(tk.Tk):
             self.current_screen.destroy()
 
     def run(self):
-        """Start the application's main event loop."""
-        self.mainloop()
+        try:
+            self.mainloop()
+        except ConfigurationError:
+            logger.error("Configuration failed. Relaunching configuration screen.")
+            self.show_config_screen()
+        except DatabaseError:
+            logger.error("Database initialization failed.")
+            sys.exit(3)
+        except Exception as e:
+            logger.exception(f"Unexpected error: {e}")
+            sys.exit(1)

@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from src.app.utils.exceptions import ConfigurationError, DatabaseError
+
 # Define the application directory in the user's home directory
 APP_DIR = Path.home() / "africa_oncology_settings"
 SETTINGS_FILE = APP_DIR / "settings.json"
@@ -41,3 +43,16 @@ class ConfigManager:
         self.settings = default_settings  # Ensure self.settings is initialized
         self.save_settings()  # Save default settings to file
         return default_settings
+
+
+def initialize_settings():
+    """Ensure the settings file and directory exist."""
+    config_manager = ConfigManager()
+    if not config_manager.settings.get("db_path"):
+        raise ConfigurationError("Database path is missing in configuration.")
+
+
+def initialize_database():
+    """Ensure the database file exists and is initialized."""
+    if not DATABASE_FILE.exists():
+        raise DatabaseError(f"Database file not found: {DATABASE_FILE}")

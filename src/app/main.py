@@ -1,10 +1,20 @@
-# from src.app.gui.app import MainApp
+# main.py
+import sys
+
 from src.app.gui.main_app import MainApp
+from src.app.utils.logger import setup_logger
+
+logger = setup_logger()
 
 
 def main():
-    app = MainApp()
-    app.run()
+    try:
+        app = MainApp()
+        app.run()
+        sys.exit(0)  # Success
+    except Exception as e:
+        logger.exception(f"Critical error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
