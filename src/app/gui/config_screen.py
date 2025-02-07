@@ -36,11 +36,17 @@ class ConfigScreen(tk.Frame):
             self.db_path_var.set(db_path)
 
     def save_and_continue(self):
-        """Save configuration and transition to the main screen."""
+        """
+        Save configuration, initialize the database, and transition to the main
+        screen.
+        """
         db_path = self.db_path_var.get()
         if db_path:
             self.config_manager.settings["db_path"] = db_path
             self.config_manager.save_settings()
+            # NEW: Initialize the database so that the file is created if it doesn't
+            # exist.
+            self.config_manager.initialize_database()
             self.parent.show_main_screen()  # Transition to the main screen
         else:
             ttk.Label(
