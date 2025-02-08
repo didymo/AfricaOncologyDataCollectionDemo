@@ -87,10 +87,41 @@ class NewDiagnosisScreen(tk.Frame):
         details_frame.pack(fill="x", padx=5, pady=2)
 
         # Histo and Grade
+        # Histo (Histopathology) with auto-complete based on Histopathology.CSV
         ttk.Label(details_frame, text="Histo").grid(row=0, column=0, sticky="w")
-        ttk.Entry(details_frame).grid(row=0, column=1, sticky="ew", padx=5)
+
+        csv_path = os.path.join(
+            os.path.dirname(__file__), "..", "csv_files", "Histopathology.CSV"
+        )
+        histo_options = []
+        with open(csv_path, newline="", encoding="latin-1") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if row:
+                    histo_options.append(" ".join(row).strip())
+
+        histo_combo = ttk.Combobox(details_frame, values=histo_options)
+        histo_combo.grid(row=0, column=1, sticky="ew", padx=5)
+
+        def on_histo_keyrelease(event):
+            typed = histo_combo.get()
+            if typed == "":
+                histo_combo["values"] = histo_options
+            else:
+                filtered = [
+                    option
+                    for option in histo_options
+                    if typed.lower() in option.lower()
+                ]
+                histo_combo["values"] = filtered
+            histo_combo.event_generate("<Down>")
+
+        histo_combo.bind("<KeyRelease>", on_histo_keyrelease)
+
+        # Grade
         ttk.Label(details_frame, text="Grade").grid(row=0, column=2, sticky="w")
-        ttk.Entry(details_frame).grid(row=0, column=3, sticky="ew", padx=5)
+        grade_combo = ttk.Combobox(details_frame, values=[1, 2, 3, 4, 9])
+        grade_combo.grid(row=0, column=3, sticky="ew", padx=5)
 
         # Factors
         ttk.Label(details_frame, text="Factors").grid(row=1, column=0, sticky="w")
