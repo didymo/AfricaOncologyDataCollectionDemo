@@ -2,8 +2,10 @@
 import sys
 import tkinter as tk
 
+from app.gui.new_diagnosis_screen import NewDiagnosisScreen
 from src.app.gui.config_screen import ConfigScreen
-from src.app.gui.main_screen import MainScreen
+
+# from src.app.gui.main_screen import NewDiagnosisScreen
 from src.app.utils.config import ConfigManager
 from src.app.utils.exceptions import ConfigurationError, DatabaseError
 from src.app.utils.logger import setup_logger
@@ -44,7 +46,7 @@ class MainApp(tk.Tk):
     def show_main_screen(self):
         """Display the main application screen."""
         self.clear_screen()
-        self.current_screen = MainScreen(self)
+        self.current_screen = NewDiagnosisScreen(self)
         self.current_screen.pack(expand=True, fill="both")
 
     def clear_screen(self):
