@@ -1,4 +1,5 @@
 # new_diagnosis_screen.py
+import datetime
 import tkinter as tk
 from tkinter import ttk
 
@@ -40,7 +41,9 @@ class NewDiagnosisScreen(tk.Frame):
         ttk.Label(info_frame, text="Date of Diagnosis").grid(
             row=1, column=0, sticky="w"
         )
-        ttk.Entry(info_frame).grid(row=1, column=1, sticky="ew", padx=5)
+        date_entry = ttk.Entry(info_frame)
+        date_entry.insert(0, datetime.date.today().strftime("%Y-%m-%d"))
+        date_entry.grid(row=1, column=1, sticky="ew", padx=5)
 
         # Diagnosis
         ttk.Label(info_frame, text="Diagnosis").grid(row=2, column=0, sticky="w")
