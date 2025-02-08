@@ -1,5 +1,4 @@
 .
-├── chatgptreport.txt
 ├── EntityClass.txt
 ├── .flake8
 ├── .github
@@ -20,10 +19,20 @@
 ├── pyproject.toml
 ├── pytest.ini
 ├── README.md
+├── requirements.txt
 ├── src
 │   ├── app
 │   │   ├── classes
 │   │   │   └── data_item.py
+│   │   ├── csv_files
+│   │   │   ├── CarePlan.CSV
+│   │   │   ├── Cause_of_Death.CSV
+│   │   │   ├── Diagnosis.ICD10.csv
+│   │   │   ├── Histopathology.CSV
+│   │   │   ├── M_stage.CSV
+│   │   │   ├── N_stage.CSV
+│   │   │   ├── Therapy.CSV
+│   │   │   └── T_stage.CSV
 │   │   ├── database
 │   │   │   ├── models.py
 │   │   │   ├── __pycache__
@@ -33,7 +42,7 @@
 │   │   │   ├── config_screen.py
 │   │   │   ├── __init__.py
 │   │   │   ├── main_app.py
-│   │   │   ├── main_screen.py
+│   │   │   ├── new_diagnosis_screen.py
 │   │   │   ├── __pycache__
 │   │   │   └── settings_creator.py
 │   │   ├── __init__.py
@@ -55,4 +64,4 @@
 ├── tox.ini
 └── tree.txt
 
-18 directories, 38 files
+19 directories, 46 files

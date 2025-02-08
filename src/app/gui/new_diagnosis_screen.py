@@ -1,5 +1,7 @@
 # new_diagnosis_screen.py
+import csv
 import datetime
+import os
 import tkinter as tk
 from tkinter import ttk
 
@@ -47,7 +49,35 @@ class NewDiagnosisScreen(tk.Frame):
 
         # Diagnosis
         ttk.Label(info_frame, text="Diagnosis").grid(row=2, column=0, sticky="w")
-        ttk.Entry(info_frame).grid(row=2, column=1, sticky="ew", padx=5)
+
+        csv_path = os.path.join(
+            os.path.dirname(__file__), "..", "csv_files", "Diagnosis.ICD10.csv"
+        )
+        diagnosis_options = []
+        with open(csv_path, newline="", encoding="latin-1") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if row:  # ensure the row is not empty
+                    diagnosis_options.append(" ".join(row).strip())
+
+        diagnosis_combo = ttk.Combobox(info_frame, values=diagnosis_options)
+        diagnosis_combo.grid(row=2, column=1, sticky="ew", padx=5)
+
+        def on_keyrelease(event):
+            typed = diagnosis_combo.get()
+            if typed == "":
+                diagnosis_combo["values"] = diagnosis_options
+            else:
+                filtered = [
+                    option
+                    for option in diagnosis_options
+                    if typed.lower() in option.lower()
+                ]
+                diagnosis_combo["values"] = filtered
+            # Optionally, open the dropdown list if there are matches.
+            diagnosis_combo.event_generate("<Down>")
+
+        diagnosis_combo.bind("<KeyRelease>", on_keyrelease)
 
         info_frame.grid_columnconfigure(1, weight=1)
 
