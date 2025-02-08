@@ -81,14 +81,24 @@ class NewDiagnosisScreen(tk.Frame):
         details_frame.grid_columnconfigure(1, weight=1)
 
     def create_care_plan(self):
-        """Create care plan section."""
+        """
+        Create care plan section with toggle buttons arranged in two equal-width
+        columns, aligned to the right with a header label on top.
+        """
+        # The LabelFrame itself is aligned to the right.
         care_frame = ttk.LabelFrame(self, padding=5)
-        care_frame.pack(fill="x", padx=5, pady=2)
+        care_frame.pack(fill="x", padx=5, pady=2, anchor="e")
 
+        # Header label for the care plan group.
         ttk.Label(
             care_frame, text="Care Planned First", font=("Arial", 10, "bold")
-        ).pack(anchor="w")
+        ).pack(anchor="center", pady=(0, 5))
 
+        # Create a subframe to hold the grid of buttons.
+        grid_frame = ttk.Frame(care_frame)
+        grid_frame.pack(anchor="e")
+
+        # Define treatments in rows. Some rows contain one button; others contain two.
         treatments = [
             ["Observe"],
             ["Surgery", "Radiation"],
@@ -97,11 +107,36 @@ class NewDiagnosisScreen(tk.Frame):
             ["Small mol."],
         ]
 
-        for row in treatments:
-            treatment_row = ttk.Frame(care_frame)
-            treatment_row.pack(fill="x", pady=2)
-            for treatment in row:
-                ttk.Checkbutton(treatment_row, text=treatment).pack(side="left", padx=5)
+        # Configure grid columns for equal expansion.
+        grid_frame.columnconfigure(0, weight=1)
+        grid_frame.columnconfigure(1, weight=1)
+
+        # Create buttons using grid layout.
+        for row_index, row in enumerate(treatments):
+            for col in range(2):
+                if col < len(row):
+                    treatment = row[col]
+                    btn = tk.Button(grid_frame, text=treatment, width=12)
+                    btn.selected = False
+                    btn.default_bg = btn.cget("bg")
+                    btn.config(command=lambda b=btn: self.toggle_button(b))
+                    btn.grid(row=row_index, column=col, padx=5, pady=2, sticky="ew")
+                else:
+                    # Insert an empty placeholder to maintain two columns.
+                    ttk.Label(grid_frame, text="").grid(
+                        row=row_index, column=col, padx=5, pady=2
+                    )
+
+    def toggle_button(self, button):
+        """Toggle the button's selected state and change its color."""
+        if button.selected:
+            # Unselect the button and revert its color.
+            button.selected = False
+            button.config(bg=button.default_bg)
+        else:
+            # Select the button and change its background to green.
+            button.selected = True
+            button.config(bg="green")
 
     def create_notes(self):
         """Create notes section."""
