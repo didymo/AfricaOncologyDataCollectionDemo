@@ -134,13 +134,61 @@ class NewDiagnosisScreen(tk.Frame):
 
         ttk.Label(stage_frame, text="Stage").pack(side="left")
         ttk.Entry(stage_frame, width=8).pack(side="left", padx=5)
+
         ttk.Label(stage_frame, text="T").pack(side="left", padx=5)
-        ttk.Entry(stage_frame, width=4).pack(side="left", padx=5)
+        t_stage_combo = ttk.Combobox(
+            stage_frame, values=["T0", "T1", "T2", "T3", "T4", "Tx"], width=4
+        )
+        t_stage_combo.pack(side="left", padx=5)
+
         ttk.Label(stage_frame, text="N").pack(side="left", padx=5)
-        ttk.Entry(stage_frame, width=4).pack(side="left", padx=5)
+        n_stage_combo = ttk.Combobox(
+            stage_frame, values=["N0", "N1", "N2", "N3", "Nx"], width=4
+        )
+        n_stage_combo.pack(side="left", padx=5)
+
         ttk.Label(stage_frame, text="M").pack(side="left", padx=5)
-        ttk.Entry(stage_frame, width=4).pack(side="left", padx=5)
-        ttk.Label(stage_frame, text="Initial Stage").pack(side="left", padx=5)
+        m_values = [
+            "M0",
+            "M1",
+            "M1-adrenal",
+            "M1-bladder",
+            "M1-bone",
+            "M1-cerebellum",
+            "M1-cerebrum",
+            "M1-eye",
+            "M1-fat",
+            "M1-headandneck",
+            "M1-heart",
+            "M1-kidneys",
+            "M1-liver",
+            "M1-lung",
+            "M1-lymphnode",
+            "M1-muscle",
+            "M1-nasalcavity",
+            "M1-oesophagus",
+            "M1-ovary",
+            "M1-pancreas",
+            "M1-parathyroid",
+            "M1-peritoneum",
+            "M1-pleural",
+            "M1-retroperitoneum",
+            "M1-salivaryglang",
+            "M1-sinuses",
+            "M1-skin",
+            "M1-spinalcanal",
+            "M1-spinalcord",
+            "M1-spleen",
+            "M1-stomach",
+            "M1-subcutaneous",
+            "M1-thyroid",
+            "M1-vagina",
+        ]
+        m_width = max(len(s) for s in m_values)
+        m_stage_combo = ttk.Combobox(stage_frame, values=m_values, width=m_width)
+        m_stage_combo.pack(side="left", padx=5)
+
+        ttk.Label(stage_frame, text="Initial\nStage").pack(side="right", padx=5)
 
         details_frame.grid_columnconfigure(1, weight=1)
 
