@@ -212,7 +212,7 @@ class NewDiagnosisScreen(tk.Frame):
 
         # Create a grid frame for two columns of buttons
         grid_frame = ttk.Frame(care_frame)
-        grid_frame.pack(anchor="e")
+        grid_frame.pack(anchor="w")
         grid_frame.columnconfigure(0, weight=1)
         grid_frame.columnconfigure(1, weight=1)
 
