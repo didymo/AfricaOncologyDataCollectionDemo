@@ -301,9 +301,9 @@ class NewDiagnosisScreen(tk.Frame):
                 "Event_Date: {}\n"
                 "Histo: {}\n"
                 "Grade: {}\n"
+                "Factors: {}\n"
                 "Stage: {}\n"
                 "Care_Plan: {}\n"
-                "Factors: {}\n"
                 "Note: {}"
             ).format(
                 patient_id,
@@ -311,9 +311,9 @@ class NewDiagnosisScreen(tk.Frame):
                 event_date,
                 histo,
                 grade,
+                factors,
                 stage,
                 care_plan,
-                factors,
                 note,
             )
 
