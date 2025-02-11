@@ -9,6 +9,24 @@ from tkinter import ttk
 class NewDiagnosisScreen(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
+        # Create canvas and scrollbar
+        self.canvas = tk.Canvas(self)
+        scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.canvas)
+
+        # Configure canvas
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")),
+        )
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Pack scrollbar and canvas
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+
+        # Create content in scrollable frame instead of self
         self.create_header()
         self.create_patient_info()
         self.create_cancer_details()
@@ -18,7 +36,7 @@ class NewDiagnosisScreen(tk.Frame):
 
     def create_header(self):
         """Create the header with navigation buttons."""
-        header_frame = ttk.Frame(self)
+        header_frame = ttk.Frame(self.scrollable_frame)
         header_frame.pack(fill="x", padx=5, pady=5)
 
         # Navigation buttons
@@ -32,7 +50,7 @@ class NewDiagnosisScreen(tk.Frame):
 
     def create_patient_info(self):
         """Create patient identification section."""
-        info_frame = ttk.LabelFrame(self, padding=5)
+        info_frame = ttk.LabelFrame(self.scrollable_frame, padding=5)
         info_frame.pack(fill="x", padx=5, pady=2)
 
         # Patient ID
@@ -85,7 +103,7 @@ class NewDiagnosisScreen(tk.Frame):
 
     def create_cancer_details(self):
         """Create cancer details section with aligned stage label."""
-        details_frame = ttk.LabelFrame(self, padding=5)
+        details_frame = ttk.LabelFrame(self.scrollable_frame, padding=5)
         details_frame.pack(fill="x", padx=5, pady=2)
 
         # Histo and Grade
@@ -195,7 +213,7 @@ class NewDiagnosisScreen(tk.Frame):
 
     def create_care_plan(self):
         """Create care plan section."""
-        care_frame = ttk.LabelFrame(self, padding=5)
+        care_frame = ttk.LabelFrame(self.scrollable_frame, padding=5)
         care_frame.pack(fill="x", padx=5, pady=2, anchor="e")
         ttk.Label(
             care_frame, text="Care Planned First", font=("Arial", 10, "bold")
@@ -246,7 +264,7 @@ class NewDiagnosisScreen(tk.Frame):
 
     def create_notes(self):
         """Create notes section."""
-        notes_frame = ttk.LabelFrame(self, padding=5)
+        notes_frame = ttk.LabelFrame(self.scrollable_frame, padding=5)
         notes_frame.pack(fill="both", expand=True, padx=5, pady=2)
 
         ttk.Label(notes_frame, text="Notes").pack(anchor="w")
@@ -255,7 +273,7 @@ class NewDiagnosisScreen(tk.Frame):
 
     def create_footer(self):
         """Create footer with copy button."""
-        footer_frame = ttk.Frame(self)
+        footer_frame = ttk.Frame(self.scrollable_frame)
         footer_frame.pack(fill="x", padx=5, pady=5)
 
         def copy_to_clipboard():
