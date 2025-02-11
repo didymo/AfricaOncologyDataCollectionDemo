@@ -122,18 +122,18 @@ class NewDiagnosisScreen(tk.Frame):
         self.histo_combo.bind("<KeyRelease>", on_histo_keyrelease)
 
         # Grade
-        ttk.Label(details_frame, text="Grade").grid(row=0, column=2, sticky="w")
+        ttk.Label(details_frame, text="Grade").grid(row=1, column=0, sticky="w")
         self.grade_combo = ttk.Combobox(details_frame, values=[1, 2, 3, 4, 9])
-        self.grade_combo.grid(row=0, column=3, sticky="ew", padx=5)
+        self.grade_combo.grid(row=1, column=1, sticky="ew", padx=5)
 
         # Factors
-        ttk.Label(details_frame, text="Factors").grid(row=1, column=0, sticky="w")
+        ttk.Label(details_frame, text="Factors").grid(row=2, column=0, sticky="w")
         self.factors_entry = ttk.Entry(details_frame)
-        self.factors_entry.grid(row=1, column=1, columnspan=3, sticky="ew", padx=5)
+        self.factors_entry.grid(row=2, column=1, columnspan=3, sticky="ew", padx=5)
 
         # Stage - Now aligned with Factors entry
         stage_frame = ttk.Frame(details_frame)
-        stage_frame.grid(row=2, column=1, columnspan=3, sticky="w")
+        stage_frame.grid(row=3, column=1, columnspan=3, sticky="w")
 
         ttk.Label(stage_frame, text="Stage").pack(side="left")
         ttk.Entry(stage_frame, width=8).pack(side="left", padx=5)
