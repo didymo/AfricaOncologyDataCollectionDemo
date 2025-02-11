@@ -191,8 +191,6 @@ class NewDiagnosisScreen(tk.Frame):
         self.m_stage_combo = ttk.Combobox(stage_frame, values=m_values, width=m_width)
         self.m_stage_combo.pack(side="left", padx=5)
 
-        ttk.Label(stage_frame, text="Initial\nStage").pack(side="right", padx=5)
-
         details_frame.grid_columnconfigure(1, weight=1)
 
     def create_care_plan(self):
