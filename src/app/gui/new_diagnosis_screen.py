@@ -70,37 +70,40 @@ class NewDiagnosisScreen(tk.Frame):
 
         # Diagnosis
         ttk.Label(info_frame, text="Diagnosis").grid(row=2, column=0, sticky="w")
-
         csv_path = os.path.join(
             os.path.dirname(__file__), "..", "csv_files", "Diagnosis.ICD10.csv"
         )
-        diagnosis_options = []
+        # Change these to be instance variables
+        self.diagnosis_codes = []  # Store just the codes
+        self.diagnosis_display = []  # Store the full display strings for the combobox
         with open(csv_path, newline="", encoding="latin-1") as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
                 if row:  # ensure the row is not empty
-                    diagnosis_options.append(" ".join(row).strip())
-
-        self.diagnosis_combo = ttk.Combobox(info_frame, values=diagnosis_options)
+                    self.diagnosis_codes.append(row[0].strip())
+                    self.diagnosis_display.append(" ".join(row).strip())
+        self.diagnosis_combo = ttk.Combobox(info_frame, values=self.diagnosis_display)
         self.diagnosis_combo.grid(row=2, column=1, sticky="ew", padx=5)
-        # self.diagnosis_combo.bind('<KeyRelease>', on_keyrelease)
 
         def on_keyrelease(event):
-            typed = event.diagnosis_combo.get()
+            # Get the text that was typed
+            typed = event.widget.get()
+
             if typed == "":
-                event.diagnosis_combo["values"] = diagnosis_options
+                event.widget["values"] = self.diagnosis_display
             else:
+                # Filter based on the display strings
                 filtered = [
                     option
-                    for option in diagnosis_options
+                    for option in self.diagnosis_display
                     if typed.lower() in option.lower()
                 ]
-                event.diagnosis_combo["values"] = filtered
-            # Optionally, open the dropdown list if there are matches.
-            event.diagnosis_combo.event_generate("<Down>")
+                event.widget["values"] = filtered
+
+            # Optionally, open the dropdown list if there are matches
+            event.widget.event_generate("<Down>")
 
         self.diagnosis_combo.bind("<KeyRelease>", on_keyrelease)
-
         info_frame.grid_columnconfigure(1, weight=1)
 
     def create_cancer_details(self):
@@ -290,18 +293,27 @@ class NewDiagnosisScreen(tk.Frame):
 
     def copy_to_clipboard(self):
         """Copy diagnosis data to clipboard and save to database."""
+        # Get the actual diagnosis code
+        selected_index = self.diagnosis_display.index(self.diagnosis_combo.get())
+        actual_code = self.diagnosis_codes[selected_index]
+
+        # Create the combined patient ID with diagnosis code
+        patient_diagnosis_id = f"{self.patient_id_entry.get()}.{actual_code}"
+
         # Gather field values
         record_data = {
-            "Patient_ID": self.patient_id_entry.get(),
-            "Event": self.diagnosis_combo.get(),
+            "Patient_ID": patient_diagnosis_id,
+            "Event": "Diagnosis",  # Changed to static "Diagnosis"
             "Event_Date": self.date_entry.get(),
             "Histo": self.histo_combo.get(),
             "Grade": self.grade_combo.get(),
-            "Stage": "{} {} {}".format(
-                self.t_stage_combo.get(),
-                self.n_stage_combo.get(),
-                self.m_stage_combo.get(),
-            ),
+            "Stage": " ".join(
+                [
+                    self.t_stage_combo.get(),
+                    self.n_stage_combo.get(),
+                    self.m_stage_combo.get(),
+                ]
+            ).strip(),
             "Care_Plan": ", ".join(
                 btn.cget("text") for btn in self.care_plan_buttons if btn.selected
             ),
