@@ -3,7 +3,9 @@ import csv
 import datetime
 import os
 import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox, ttk
+
+from app.database.database_service import DatabaseService
 
 
 class NewDiagnosisScreen(tk.Frame):
@@ -147,6 +149,11 @@ class NewDiagnosisScreen(tk.Frame):
         # Factors
         ttk.Label(details_frame, text="Factors").grid(row=2, column=0, sticky="w")
         self.factors_entry = ttk.Entry(details_frame)
+        default_factors = (
+            "ER|PR|HER2|LN/|BRCA1|BRCA2|GS+|PSA|EPE|cores/|"
+            "p16|EBV|ENE|PNI|PDL1%|EGFR|ALK|ROS1|BRAF|KRAS|R-mm"
+        )
+        self.factors_entry.insert(0, default_factors)
         self.factors_entry.grid(row=2, column=1, columnspan=3, sticky="ew", padx=5)
 
         # Stage - Now aligned with Factors entry
@@ -276,52 +283,57 @@ class NewDiagnosisScreen(tk.Frame):
         footer_frame = ttk.Frame(self.scrollable_frame)
         footer_frame.pack(fill="x", padx=5, pady=5)
 
-        def copy_to_clipboard():
-            # Gather field values for copying:
-            patient_id = self.patient_id_entry.get()
-            event = self.diagnosis_combo.get()
-            event_date = self.date_entry.get()
-            histo = self.histo_combo.get()
-            grade = self.grade_combo.get()
-            stage = "{} {} {}".format(
+        # Create COPY button calling the copy_to_clipboard function
+        ttk.Button(footer_frame, text="COPY", command=self.copy_to_clipboard).pack(
+            side="right"
+        )
+
+    def copy_to_clipboard(self):
+        """Copy diagnosis data to clipboard and save to database."""
+        # Gather field values
+        record_data = {
+            "Patient_ID": self.patient_id_entry.get(),
+            "Event": self.diagnosis_combo.get(),
+            "Event_Date": self.date_entry.get(),
+            "Histo": self.histo_combo.get(),
+            "Grade": self.grade_combo.get(),
+            "Stage": "{} {} {}".format(
                 self.t_stage_combo.get(),
                 self.n_stage_combo.get(),
                 self.m_stage_combo.get(),
-            )
-            care_plan = ", ".join(
+            ),
+            "Care_Plan": ", ".join(
                 btn.cget("text") for btn in self.care_plan_buttons if btn.selected
+            ),
+            "Factors": self.factors_entry.get(),
+            "Note": self.notes_text.get("1.0", "end").strip(),
+        }
+
+        # Format the output string for clipboard
+        output = (
+            "Patient_ID: {Patient_ID}\n"
+            "Event: {Event}\n"
+            "Event_Date: {Event_Date}\n"
+            "Histo: {Histo}\n"
+            "Grade: {Grade}\n"
+            "Factors: {Factors}\n"
+            "Stage: {Stage}\n"
+            "Care_Plan: {Care_Plan}\n"
+            "Note: {Note}"
+        ).format(**record_data)
+
+        # Copy to clipboard
+        self.clipboard_clear()
+        self.clipboard_append(output)
+
+        # Save to database
+        try:
+            db_service = DatabaseService()  # Singleton instance
+            record_id = db_service.save_diagnosis_record(record_data)
+            # Optionally show success message
+            messagebox.showinfo(
+                "Success", f"Record saved successfully (ID: {record_id})"
             )
-            factors = self.factors_entry.get()
-            note = self.notes_text.get("1.0", "end").strip()
-
-            # Format the output string:
-            output = (
-                "Patient_ID: {}\n"
-                "Event: {}\n"
-                "Event_Date: {}\n"
-                "Histo: {}\n"
-                "Grade: {}\n"
-                "Factors: {}\n"
-                "Stage: {}\n"
-                "Care_Plan: {}\n"
-                "Note: {}"
-            ).format(
-                patient_id,
-                event,
-                event_date,
-                histo,
-                grade,
-                factors,
-                stage,
-                care_plan,
-                note,
-            )
-
-            # Copy to the clipboard.
-            self.clipboard_clear()
-            self.clipboard_append(output)
-
-        # Replace the existing COPY button with one that calls copy_to_clipboard:
-        ttk.Button(footer_frame, text="COPY", command=copy_to_clipboard).pack(
-            side="right"
-        )
+        except Exception as e:
+            # Show error message if database save fails
+            messagebox.showerror("Error", f"Failed to save record: {str(e)}")

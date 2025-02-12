@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS oncology_data (
     Event_Date TEXT NOT NULL,
     Histo TEXT,
     Grade TEXT,
+    Factors TEXT,
     Stage TEXT,
     Careplan TEXT,
-    Factors TEXT,
     Note TEXT
 );
