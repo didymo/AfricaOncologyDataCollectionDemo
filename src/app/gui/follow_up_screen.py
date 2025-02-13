@@ -25,6 +25,11 @@ class FollowUpScreen(tk.Frame):
         self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         self.canvas.configure(yscrollcommand=scrollbar.set)
 
+        # Predefine instance attributes to satisfy the IDE.
+        self.patient_id_combo = None
+        self.date_entry = None
+        self.diagnosis_combo = None
+
         # Pack scrollbar and canvas
         scrollbar.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
@@ -61,12 +66,43 @@ class FollowUpScreen(tk.Frame):
         info_frame = ttk.LabelFrame(self.scrollable_frame, padding=5)
         info_frame.pack(fill="x", padx=5, pady=2)
 
-        # Patient ID
+        # --- Patient ID with live search ---
         ttk.Label(info_frame, text="Patient ID").grid(row=0, column=0, sticky="w")
-        self.patient_id_entry = ttk.Entry(info_frame)
-        self.patient_id_entry.grid(row=0, column=1, sticky="ew", padx=5)
+        # Replace the Entry with a Combobox
+        self.patient_id_combo = ttk.Combobox(info_frame)
+        self.patient_id_combo.grid(row=0, column=1, sticky="ew", padx=5)
 
-        # Date of Diagnosis
+        def on_patient_id_keyrelease(event):
+            typed = event.widget.get()
+            # Use the DatabaseService to search for PatientID values that start with
+            # the typed text.
+            # import here to avoid circular deps
+            from app.database.database_service import (
+                DatabaseService,
+            )
+
+            db_service = DatabaseService()
+            with db_service.get_connection() as conn:
+                cursor = conn.cursor()
+                # Query distinct PatientIDs that start with the typed text.
+                cursor.execute(
+                    "SELECT DISTINCT PatientID FROM oncology_data "
+                    "WHERE PatientID LIKE ?",
+                    (typed + "%",),
+                )
+
+                results = [row[0] for row in cursor.fetchall()]
+            # Update the combobox values if any results are found.
+            if results:
+                event.widget["values"] = results
+                event.widget.event_generate("<Down>")
+            else:
+                # If no matches, clear the dropdown list.
+                event.widget["values"] = []
+
+        self.patient_id_combo.bind("<KeyRelease>", on_patient_id_keyrelease)
+
+        # --- Date of Diagnosis ---
         ttk.Label(info_frame, text="Date of Diagnosis").grid(
             row=1, column=0, sticky="w"
         )
@@ -74,12 +110,11 @@ class FollowUpScreen(tk.Frame):
         self.date_entry.insert(0, datetime.date.today().strftime("%Y-%m-%d"))
         self.date_entry.grid(row=1, column=1, sticky="ew", padx=5)
 
-        # Diagnosis
+        # --- Diagnosis ---
         ttk.Label(info_frame, text="Diagnosis").grid(row=2, column=0, sticky="w")
         csv_path = os.path.join(
             os.path.dirname(__file__), "..", "csv_files", "Diagnosis.ICD10.csv"
         )
-        # Change these to be instance variables
         self.diagnosis_codes = []  # Store just the codes
         self.diagnosis_display = []  # Store the full display strings for the combobox
         with open(csv_path, newline="", encoding="latin-1") as csvfile:
@@ -94,19 +129,15 @@ class FollowUpScreen(tk.Frame):
         def on_keyrelease(event):
             # Get the text that was typed
             typed = event.widget.get()
-
             if typed == "":
                 event.widget["values"] = self.diagnosis_display
             else:
-                # Filter based on the display strings
                 filtered = [
                     option
                     for option in self.diagnosis_display
                     if typed.lower() in option.lower()
                 ]
                 event.widget["values"] = filtered
-
-            # Optionally, open the dropdown list if there are matches
             event.widget.event_generate("<Down>")
 
         self.diagnosis_combo.bind("<KeyRelease>", on_keyrelease)
