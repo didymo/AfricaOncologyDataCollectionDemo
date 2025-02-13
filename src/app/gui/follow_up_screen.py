@@ -1,4 +1,4 @@
-# new_diagnosis_screen.py
+# follow_up_screen.py
 import csv
 import datetime
 import os
@@ -8,7 +8,7 @@ from tkinter import messagebox, ttk
 from app.database.database_service import DatabaseService
 
 
-class NewDiagnosisScreen(tk.Frame):
+class FollowUpScreen(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -309,7 +309,7 @@ class NewDiagnosisScreen(tk.Frame):
         # Gather field values
         record_data = {
             "Patient_ID": patient_diagnosis_id,
-            "Event": "Diagnosis",  # Changed to static "Diagnosis"
+            "Event": "Follow Up",
             "Event_Date": self.date_entry.get(),
             "Histo": self.histo_combo.get(),
             "Grade": self.grade_combo.get(),

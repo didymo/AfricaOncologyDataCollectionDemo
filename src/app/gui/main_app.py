@@ -2,14 +2,13 @@
 import sys
 import tkinter as tk
 
+from app.gui.config_screen import ConfigScreen  # Assuming you have a config screen
+from app.gui.follow_up_screen import FollowUpScreen  # Make sure this import is correct
 from app.gui.new_diagnosis_screen import NewDiagnosisScreen
-from src.app.gui.config_screen import ConfigScreen
-
-# from src.app.gui.main_screen import NewDiagnosisScreen
-from src.app.utils.config import ConfigManager
-from src.app.utils.exceptions import ConfigurationError, DatabaseError
-from src.app.utils.logger import setup_logger
-from src.app.utils.setup import check_initialization
+from app.utils.config import ConfigManager
+from app.utils.exceptions import ConfigurationError, DatabaseError
+from app.utils.logger import setup_logger
+from app.utils.setup import check_initialization
 
 logger = setup_logger()
 
@@ -21,16 +20,14 @@ class MainApp(tk.Tk):
         self.geometry("800x600")
         self.config_manager = ConfigManager()
 
-        # Placeholder for the current screen
+        # Placeholder for the current screen (each screen is a Frame)
         self.current_screen = None
 
         try:
-            # Check if both config and database exist
             if check_initialization():
-                # Both exist, proceed to main screen
-                self.show_main_screen()
+                # If initialized, show the New Diagnosis screen by default.
+                self.show_new_diagnosis_screen()
             else:
-                # One or both missing, show config screen
                 logger.info("Configuration or database missing. Showing config screen.")
                 self.show_config_screen()
         except Exception as e:
@@ -40,13 +37,22 @@ class MainApp(tk.Tk):
     def show_config_screen(self):
         """Display the configuration screen."""
         self.clear_screen()
-        self.current_screen = ConfigScreen(self)
+        # Pass 'controller=self' so that the config screen can also navigate if needed.
+        self.current_screen = ConfigScreen(self, controller=self)
         self.current_screen.pack(expand=True, fill="both")
 
-    def show_main_screen(self):
-        """Display the main application screen."""
+    def show_new_diagnosis_screen(self):
+        """Display the New Diagnosis screen."""
         self.clear_screen()
-        self.current_screen = NewDiagnosisScreen(self)
+        # Pass 'controller=self' so the NewDiagnosisScreen can call navigation methods.
+        self.current_screen = NewDiagnosisScreen(self, controller=self)
+        self.current_screen.pack(expand=True, fill="both")
+
+    def show_followup_screen(self):
+        """Display the Follow-Up screen."""
+        self.clear_screen()
+        # Pass 'controller=self' so the FollowUpScreen can call navigation methods.
+        self.current_screen = FollowUpScreen(self, controller=self)
         self.current_screen.pack(expand=True, fill="both")
 
     def clear_screen(self):
