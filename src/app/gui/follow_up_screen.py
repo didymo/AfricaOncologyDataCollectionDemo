@@ -29,6 +29,9 @@ class FollowUpScreen(tk.Frame):
         self.patient_id_combo = None
         self.date_entry = None
         self.diagnosis_combo = None
+        self.histo_combo = None
+        self.grade_combo = None
+        self.factors_entry = None
 
         # Pack scrollbar and canvas
         scrollbar.pack(side="right", fill="y")
@@ -62,45 +65,69 @@ class FollowUpScreen(tk.Frame):
         death_btn.pack(side="left", padx=2)
 
     def create_patient_info(self):
-        """Create patient identification section."""
+        """Create patient identification section.
+        When a Patient ID is selected, populate Diagnosis, Histo, Grade, and Factors.
+        """
         info_frame = ttk.LabelFrame(self.scrollable_frame, padding=5)
         info_frame.pack(fill="x", padx=5, pady=2)
 
         # --- Patient ID with live search ---
         ttk.Label(info_frame, text="Patient ID").grid(row=0, column=0, sticky="w")
-        # Replace the Entry with a Combobox
+        # Use a Combobox instead of an Entry
         self.patient_id_combo = ttk.Combobox(info_frame)
         self.patient_id_combo.grid(row=0, column=1, sticky="ew", padx=5)
 
         def on_patient_id_keyrelease(event):
             typed = event.widget.get()
-            # Use the DatabaseService to search for PatientID values that start with
-            # the typed text.
-            # import here to avoid circular deps
-            from app.database.database_service import (
-                DatabaseService,
-            )
+            # Import DatabaseService here to avoid circular dependencies
+            from app.database.database_service import DatabaseService
 
             db_service = DatabaseService()
             with db_service.get_connection() as conn:
                 cursor = conn.cursor()
-                # Query distinct PatientIDs that start with the typed text.
                 cursor.execute(
                     "SELECT DISTINCT PatientID FROM oncology_data "
                     "WHERE PatientID LIKE ?",
                     (typed + "%",),
                 )
-
                 results = [row[0] for row in cursor.fetchall()]
-            # Update the combobox values if any results are found.
             if results:
                 event.widget["values"] = results
                 event.widget.event_generate("<Down>")
             else:
-                # If no matches, clear the dropdown list.
                 event.widget["values"] = []
 
         self.patient_id_combo.bind("<KeyRelease>", on_patient_id_keyrelease)
+
+        # When a Patient ID is selected, populate the fields below.
+        def on_patient_id_selected(event):
+            selected_patient_id = event.widget.get()
+            from app.database.database_service import DatabaseService
+
+            db_service = DatabaseService()
+            records = db_service.get_patient_records(selected_patient_id)
+            if not records:
+                return
+            # If more than one record exists, choose the first for simplicity.
+            record = records[0]
+            # The PatientID in the record is assumed to be
+            # of the form "patientID.diagnosisCode"
+            parts = record.get("PatientID", "").split(".")
+            diagnosis_code = parts[1] if len(parts) > 1 else ""
+            # Map the diagnosis code to the corresponding display value from the CSV
+            if diagnosis_code in self.diagnosis_codes:
+                index = self.diagnosis_codes.index(diagnosis_code)
+                diagnosis_display_value = self.diagnosis_display[index]
+            else:
+                diagnosis_display_value = ""
+            self.diagnosis_combo.set(diagnosis_display_value)
+            # Populate Histo, Grade, and Factors fields from the record
+            self.histo_combo.set(record.get("Histo", ""))
+            self.grade_combo.set(record.get("Grade", ""))
+            self.factors_entry.delete(0, tk.END)
+            self.factors_entry.insert(0, record.get("Factors", ""))
+
+        self.patient_id_combo.bind("<<ComboboxSelected>>", on_patient_id_selected)
 
         # --- Date of Diagnosis ---
         ttk.Label(info_frame, text="Date of Diagnosis").grid(
@@ -127,7 +154,6 @@ class FollowUpScreen(tk.Frame):
         self.diagnosis_combo.grid(row=2, column=1, sticky="ew", padx=5)
 
         def on_keyrelease(event):
-            # Get the text that was typed
             typed = event.widget.get()
             if typed == "":
                 event.widget["values"] = self.diagnosis_display
@@ -151,7 +177,6 @@ class FollowUpScreen(tk.Frame):
         # Histo and Grade
         # Histo (Histopathology) with auto-complete based on Histopathology.CSV
         ttk.Label(details_frame, text="Histo").grid(row=0, column=0, sticky="w")
-
         csv_path = os.path.join(
             os.path.dirname(__file__), "..", "csv_files", "Histopathology.CSV"
         )
@@ -161,10 +186,8 @@ class FollowUpScreen(tk.Frame):
             for row in reader:
                 if row:
                     histo_options.append(" ".join(row).strip())
-
         self.histo_combo = ttk.Combobox(details_frame, values=histo_options)
         self.histo_combo.grid(row=0, column=1, sticky="ew", padx=5)
-        # self.histo_combo.bind('<KeyRelease>', on_histo_keyrelease)
 
         def on_histo_keyrelease(event):
             typed = event.histo_combo.get()
@@ -199,22 +222,18 @@ class FollowUpScreen(tk.Frame):
         # Stage - Now aligned with Factors entry
         stage_frame = ttk.Frame(details_frame)
         stage_frame.grid(row=3, column=1, columnspan=3, sticky="w")
-
         ttk.Label(stage_frame, text="Stage").pack(side="left")
         ttk.Entry(stage_frame, width=8).pack(side="left", padx=5)
-
         ttk.Label(stage_frame, text="T").pack(side="left", padx=5)
         self.t_stage_combo = ttk.Combobox(
             stage_frame, values=["T0", "T1", "T2", "T3", "T4", "Tx"], width=4
         )
         self.t_stage_combo.pack(side="left", padx=5)
-
         ttk.Label(stage_frame, text="N").pack(side="left", padx=5)
         self.n_stage_combo = ttk.Combobox(
             stage_frame, values=["N0", "N1", "N2", "N3", "Nx"], width=4
         )
         self.n_stage_combo.pack(side="left", padx=5)
-
         ttk.Label(stage_frame, text="M").pack(side="left", padx=5)
         m_values = [
             "M0",
@@ -255,7 +274,6 @@ class FollowUpScreen(tk.Frame):
         m_width = max(len(s) for s in m_values)
         self.m_stage_combo = ttk.Combobox(stage_frame, values=m_values, width=m_width)
         self.m_stage_combo.pack(side="left", padx=5)
-
         details_frame.grid_columnconfigure(1, weight=1)
 
     def create_care_plan(self):
@@ -265,8 +283,6 @@ class FollowUpScreen(tk.Frame):
         ttk.Label(
             care_frame, text="Care Planned First", font=("Arial", 10, "bold")
         ).pack(anchor="center", pady=(0, 5))
-
-        # Define treatment groups as before
         treatments = [
             ["Observe"],
             ["Surgery", "Radiation"],
@@ -274,14 +290,10 @@ class FollowUpScreen(tk.Frame):
             ["Immuno", "Hormones"],
             ["Small mol."],
         ]
-
-        # Create a grid frame for two columns of buttons
         grid_frame = ttk.Frame(care_frame)
         grid_frame.pack(anchor="w")
         grid_frame.columnconfigure(0, weight=1)
         grid_frame.columnconfigure(1, weight=1)
-
-        # Create toggle buttons and store them in self.care_plan_buttons
         self.care_plan_buttons = []
         for row_index, row in enumerate(treatments):
             for col in range(2):
@@ -301,11 +313,9 @@ class FollowUpScreen(tk.Frame):
     def toggle_button(self, button):
         """Toggle the button's selected state and change its color."""
         if button.selected:
-            # Unselect the button and revert its color.
             button.selected = False
             button.config(bg=button.default_bg)
         else:
-            # Select the button and change its background to green.
             button.selected = True
             button.config(bg="green")
 
@@ -313,7 +323,6 @@ class FollowUpScreen(tk.Frame):
         """Create notes section."""
         notes_frame = ttk.LabelFrame(self.scrollable_frame, padding=5)
         notes_frame.pack(fill="both", expand=True, padx=5, pady=2)
-
         ttk.Label(notes_frame, text="Notes").pack(anchor="w")
         self.notes_text = tk.Text(notes_frame, height=4)
         self.notes_text.pack(fill="both", expand=True, pady=5)
@@ -322,22 +331,17 @@ class FollowUpScreen(tk.Frame):
         """Create footer with copy button."""
         footer_frame = ttk.Frame(self.scrollable_frame)
         footer_frame.pack(fill="x", padx=5, pady=5)
-
-        # Create COPY button calling the copy_to_clipboard function
         ttk.Button(footer_frame, text="COPY", command=self.copy_to_clipboard).pack(
             side="right"
         )
 
     def copy_to_clipboard(self):
         """Copy diagnosis data to clipboard and save to database."""
-        # Get the actual diagnosis code
+        # Get the actual diagnosis code from the diagnosis combobox
         selected_index = self.diagnosis_display.index(self.diagnosis_combo.get())
         actual_code = self.diagnosis_codes[selected_index]
-
         # Create the combined patient ID with diagnosis code
-        patient_diagnosis_id = f"{self.patient_id_entry.get()}.{actual_code}"
-
-        # Gather field values
+        patient_diagnosis_id = f"{self.patient_id_combo.get()}.{actual_code}"
         record_data = {
             "Patient_ID": patient_diagnosis_id,
             "Event": "Follow Up",
@@ -357,8 +361,6 @@ class FollowUpScreen(tk.Frame):
             "Factors": self.factors_entry.get(),
             "Note": self.notes_text.get("1.0", "end").strip(),
         }
-
-        # Format the output string for clipboard
         output = (
             "Patient_ID: {Patient_ID}\n"
             "Event: {Event}\n"
@@ -370,19 +372,13 @@ class FollowUpScreen(tk.Frame):
             "Care_Plan: {Care_Plan}\n"
             "Note: {Note}"
         ).format(**record_data)
-
-        # Copy to clipboard
         self.clipboard_clear()
         self.clipboard_append(output)
-
-        # Save to database
         try:
             db_service = DatabaseService()  # Singleton instance
             record_id = db_service.save_diagnosis_record(record_data)
-            # Optionally show success message
             messagebox.showinfo(
                 "Success", f"Record saved successfully (ID: {record_id})"
             )
         except Exception as e:
-            # Show error message if database save fails
             messagebox.showerror("Error", f"Failed to save record: {str(e)}")
