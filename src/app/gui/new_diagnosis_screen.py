@@ -50,7 +50,9 @@ class NewDiagnosisScreen(tk.Frame):
         followup_btn = ttk.Button(
             header_frame, text="FollowUp", command=self.controller.show_followup_screen
         )
-        death_btn = ttk.Button(header_frame, text="Death")
+        death_btn = ttk.Button(
+            header_frame, text="Death", command=self.controller.show_death_screen
+        )
 
         new_dx_btn.pack(side="left", padx=2)
         followup_btn.pack(side="left", padx=2)

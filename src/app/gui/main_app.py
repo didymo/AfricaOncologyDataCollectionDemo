@@ -3,6 +3,7 @@ import sys
 import tkinter as tk
 
 from app.gui.config_screen import ConfigScreen  # Assuming you have a config screen
+from app.gui.death_screen import DeathScreen
 from app.gui.follow_up_screen import FollowUpScreen  # Make sure this import is correct
 from app.gui.new_diagnosis_screen import NewDiagnosisScreen
 from app.utils.config import ConfigManager
@@ -17,7 +18,7 @@ class MainApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Africa Oncology Data Collection")
-        self.geometry("800x600")
+        self.geometry("1200x800")
         self.config_manager = ConfigManager()
 
         # Placeholder for the current screen (each screen is a Frame)
@@ -53,6 +54,12 @@ class MainApp(tk.Tk):
         self.clear_screen()
         # Pass 'controller=self' so the FollowUpScreen can call navigation methods.
         self.current_screen = FollowUpScreen(self, controller=self)
+        self.current_screen.pack(expand=True, fill="both")
+
+    def show_death_screen(self):
+        """Display the Death screen."""
+        self.clear_screen()
+        self.current_screen = DeathScreen(self, controller=self)
         self.current_screen.pack(expand=True, fill="both")
 
     def clear_screen(self):

@@ -1,4 +1,4 @@
-# follow_up_screen.py
+# death_screen.py
 import csv
 import datetime
 import os
@@ -8,7 +8,7 @@ from tkinter import messagebox, ttk
 from app.database.database_service import DatabaseService
 
 
-class FollowUpScreen(tk.Frame):
+class DeathScreen(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
