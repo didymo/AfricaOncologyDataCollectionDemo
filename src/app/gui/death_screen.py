@@ -41,7 +41,7 @@ class DeathScreen(tk.Frame):
         self.create_header()
         self.create_patient_info()
         self.create_cancer_details()
-        self.create_care_plan()
+        self.death_date_cause()
         self.create_notes()
         self.create_footer()
 
@@ -278,48 +278,37 @@ class DeathScreen(tk.Frame):
         self.m_stage_combo.pack(side="left", padx=5)
         details_frame.grid_columnconfigure(1, weight=1)
 
-    def create_care_plan(self):
-        """Create care plan section."""
-        care_frame = ttk.LabelFrame(self.scrollable_frame, padding=5)
-        care_frame.pack(fill="x", padx=5, pady=2, anchor="e")
-        ttk.Label(
-            care_frame, text="Care Planned First", font=("Arial", 10, "bold")
-        ).pack(anchor="center", pady=(0, 5))
-        treatments = [
-            ["Observe"],
-            ["Surgery", "Radiation"],
-            ["Chemo", "Brachy"],
-            ["Immuno", "Hormones"],
-            ["Small mol."],
-        ]
-        grid_frame = ttk.Frame(care_frame)
-        grid_frame.pack(anchor="w")
-        grid_frame.columnconfigure(0, weight=1)
-        grid_frame.columnconfigure(1, weight=1)
-        self.care_plan_buttons = []
-        for row_index, row in enumerate(treatments):
-            for col in range(2):
-                if col < len(row):
-                    treatment = row[col]
-                    btn = tk.Button(grid_frame, text=treatment)
-                    btn.selected = False
-                    btn.default_bg = btn.cget("bg")
-                    btn.config(command=lambda b=btn: self.toggle_button(b))
-                    btn.grid(row=row_index, column=col, padx=5, pady=2, sticky="ew")
-                    self.care_plan_buttons.append(btn)
-                else:
-                    ttk.Label(grid_frame, text="").grid(
-                        row=row_index, column=col, padx=5, pady=2
-                    )
+    def death_date_cause(self):
+        """Replaces the Care Planned First section with death info inputs."""
+        death_frame = ttk.LabelFrame(self.scrollable_frame, padding=5)
+        death_frame.pack(fill="x", padx=5, pady=2, anchor="w")
 
-    def toggle_button(self, button):
-        """Toggle the button's selected state and change its color."""
-        if button.selected:
-            button.selected = False
-            button.config(bg=button.default_bg)
-        else:
-            button.selected = True
-            button.config(bg="green")
+        # First row: Date of Death
+        ttk.Label(death_frame, text="Date of Death").grid(
+            row=0, column=0, sticky="w", padx=5, pady=2
+        )
+        self.death_date_entry = ttk.Entry(death_frame)
+        self.death_date_entry.insert(0, datetime.date.today().strftime("%Y-%m-%d"))
+        self.death_date_entry.grid(row=0, column=1, sticky="ew", padx=5, pady=2)
+
+        # Second row: Cause of Death
+        ttk.Label(death_frame, text="Cause of Death").grid(
+            row=1, column=0, sticky="w", padx=5, pady=2
+        )
+        self.cause_of_death_entry = ttk.Entry(death_frame)
+        self.cause_of_death_entry.grid(row=1, column=1, sticky="ew", padx=5, pady=2)
+
+        death_frame.columnconfigure(0, weight=0)
+        death_frame.columnconfigure(1, weight=1)
+
+    # def toggle_button(self, button):
+    #     """Toggle the button's selected state and change its color."""
+    #     if button.selected:
+    #         button.selected = False
+    #         button.config(bg=button.default_bg)
+    #     else:
+    #         button.selected = True
+    #         button.config(bg="green")
 
     def create_notes(self):
         """Create notes section."""
