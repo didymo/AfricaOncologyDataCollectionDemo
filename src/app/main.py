@@ -1,7 +1,9 @@
 # main.py
 import sys
 
-from src.app.gui.main_app import MainApp
+from app.gui.main_app import MainApp
+
+# from src.app.gui.main_app import MainApp
 from src.app.utils.logger import setup_logger
 
 logger = setup_logger()

@@ -1,3 +1,4 @@
+# config_screen.py
 import tkinter as tk
 from tkinter import filedialog, ttk
 
@@ -44,10 +45,10 @@ class ConfigScreen(tk.Frame):
         if db_path:
             self.config_manager.settings["db_path"] = db_path
             self.config_manager.save_settings()
-            # NEW: Initialize the database so that the file is created if it doesn't
+            # Initialize the database so that the file is created if it doesn't
             # exist.
             self.config_manager.initialize_database()
-            self.parent.show_main_screen()  # Transition to the main screen
+            self.parent.show_new_diagnosis_screen()  # Transition to the main screen
         else:
             ttk.Label(
                 self, text="Database path cannot be empty!", foreground="red"
