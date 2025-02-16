@@ -12,7 +12,7 @@ charset-normalizer==3.4.1
 click==8.1.8
 colorama==0.4.6
 coverage==7.6.10
-cryptography==44.0.0
+cryptography==44.0.1
 cyclonedx-python-lib==7.6.2
 defusedxml==0.7.1
 distlib==0.3.9
