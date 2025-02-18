@@ -331,14 +331,19 @@ class DeathScreen(tk.Frame):
         # Get the actual diagnosis code from the diagnosis combobox
         selected_index = self.diagnosis_display.index(self.diagnosis_combo.get())
         actual_code = self.diagnosis_codes[selected_index]
+
         # Create the combined patient ID with diagnosis code
         patient_diagnosis_id = f"{self.patient_id_combo.get()}.{actual_code}"
+
+        # Create record_data with field names matching the database schema
         record_data = {
-            "Patient_ID": patient_diagnosis_id,
-            "Event": "Follow Up",
+            "PatientID": patient_diagnosis_id,
+            "Event": "Death",
             "Event_Date": self.date_entry.get(),
+            "Diagnosis": actual_code,
             "Histo": self.histo_combo.get(),
             "Grade": self.grade_combo.get(),
+            "Factors": self.factors_entry.get(),
             "Stage": " ".join(
                 [
                     self.t_stage_combo.get(),
@@ -346,25 +351,30 @@ class DeathScreen(tk.Frame):
                     self.m_stage_combo.get(),
                 ]
             ).strip(),
-            "Care_Plan": ", ".join(
-                btn.cget("text") for btn in self.care_plan_buttons if btn.selected
-            ),
-            "Factors": self.factors_entry.get(),
+            "Death_Date": self.death_date_entry.get(),
+            "Death_Cause": self.cause_of_death_entry.get(),
+            "Careplan": "",  # Empty string, this field is not used for death records
             "Note": self.notes_text.get("1.0", "end").strip(),
         }
+
+        # Format the clipboard output
         output = (
-            "Patient_ID: {Patient_ID}\n"
+            "PatientID: {PatientID}\n"
             "Event: {Event}\n"
             "Event_Date: {Event_Date}\n"
+            "Diagnosis: {Diagnosis}\n"
             "Histo: {Histo}\n"
             "Grade: {Grade}\n"
             "Factors: {Factors}\n"
             "Stage: {Stage}\n"
-            "Care_Plan: {Care_Plan}\n"
+            "Death_Date: {Death_Date}\n"
+            "Death_Cause: {Death_Cause}\n"
             "Note: {Note}"
         ).format(**record_data)
+
         self.clipboard_clear()
         self.clipboard_append(output)
+
         try:
             db_service = DatabaseService()  # Singleton instance
             record_id = db_service.save_diagnosis_record(record_data)

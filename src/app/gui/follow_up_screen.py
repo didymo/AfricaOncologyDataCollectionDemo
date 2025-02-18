@@ -112,10 +112,10 @@ class FollowUpScreen(tk.Frame):
                 return
             # If more than one record exists, choose the first for simplicity.
             record = records[0]
-            # The PatientID in the record is assumed to be
-            # of the form "patientID.diagnosisCode"
-            parts = record.get("PatientID", "").split(".")
-            diagnosis_code = parts[1] if len(parts) > 1 else ""
+
+            # Retrieve the diagnosis code directly from the Diagnosis field.
+            diagnosis_code = record.get("Diagnosis", "")
+
             # Map the diagnosis code to the corresponding display value from the CSV
             if diagnosis_code in self.diagnosis_codes:
                 index = self.diagnosis_codes.index(diagnosis_code)

@@ -310,9 +310,10 @@ class NewDiagnosisScreen(tk.Frame):
 
         # Gather field values
         record_data = {
-            "Patient_ID": patient_diagnosis_id,
+            "PatientID": patient_diagnosis_id,
             "Event": "Diagnosis",  # Changed to static "Diagnosis"
             "Event_Date": self.date_entry.get(),
+            "Diagnosis": actual_code,
             "Histo": self.histo_combo.get(),
             "Grade": self.grade_combo.get(),
             "Stage": " ".join(
@@ -322,7 +323,7 @@ class NewDiagnosisScreen(tk.Frame):
                     self.m_stage_combo.get(),
                 ]
             ).strip(),
-            "Care_Plan": ", ".join(
+            "Careplan": ", ".join(
                 btn.cget("text") for btn in self.care_plan_buttons if btn.selected
             ),
             "Factors": self.factors_entry.get(),
@@ -331,14 +332,15 @@ class NewDiagnosisScreen(tk.Frame):
 
         # Format the output string for clipboard
         output = (
-            "Patient_ID: {Patient_ID}\n"
+            "Patient_ID: {PatientID}\n"
             "Event: {Event}\n"
             "Event_Date: {Event_Date}\n"
+            "Diagnosis: {Diagnosis}\n"
             "Histo: {Histo}\n"
             "Grade: {Grade}\n"
             "Factors: {Factors}\n"
             "Stage: {Stage}\n"
-            "Care_Plan: {Care_Plan}\n"
+            "Careplan: {Careplan}\n"
             "Note: {Note}"
         ).format(**record_data)
 
