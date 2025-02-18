@@ -56,42 +56,54 @@ class DatabaseService:
 
     def save_diagnosis_record(self, record_data: Dict) -> int:
         """
-        Save a new diagnosis record to the database.
-        Returns the AutoincrementID of the inserted record.
+        Save a new record to the database.
+        Supports data from Diagnosis, Follow Up, and Death screens.
+        Returns the autoincrement ID of the inserted record.
         """
-        with self._lock:  # Ensure thread-safe write operation
+        with self._lock:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
 
-                # Prepare the SQL statement
-                sql = """
-                INSERT INTO oncology_data (
-                    record_creation_datetime,
-                    PatientID,
-                    Event,
-                    Event_Date,
-                    Histo,
-                    Grade,
-                    Factors,
-                    Stage,
-                    Careplan,
-                    Note
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """
+                # Always record the creation time.
+                data = {"record_creation_datetime": datetime.datetime.now().isoformat()}
 
-                # Prepare the values tuple
-                values = (
-                    datetime.datetime.now().isoformat(),
-                    record_data.get("Patient_ID", ""),
-                    record_data.get("Event", ""),
-                    record_data.get("Event_Date", ""),
-                    record_data.get("Histo", ""),
-                    record_data.get("Grade", ""),
-                    record_data.get("Factors", ""),
-                    record_data.get("Stage", ""),
-                    record_data.get("Care_Plan", ""),
-                    record_data.get("Note", ""),
+                # Mapping: canonical database column -> possible keys in record_data.
+                mapping = {
+                    "PatientID": ["PatientID", "Patient_ID"],
+                    "Event": ["Event"],
+                    "Event_Date": ["Event_Date"],
+                    "Diagnosis": ["Diagnosis"],
+                    "Histo": ["Histo"],
+                    "Grade": ["Grade"],
+                    "Factors": ["Factors"],
+                    "Stage": ["Stage"],
+                    "Careplan": ["Careplan", "Care_Plan"],
+                    "Note": ["Note"],
+                    "Death_Date": ["Death_Date"],
+                    "Death_Cause": ["Death_Cause"],
+                }
+
+                # For each canonical column, pick the first matching key
+                # from record_data.
+                for col, keys in mapping.items():
+                    for key in keys:
+                        if key in record_data:
+                            data[col] = record_data[key]
+                            break
+                    else:
+                        # If none of the expected keys are found,
+                        # default to empty string.
+                        data[col] = ""
+
+                # Build the INSERT statement dynamically based on the keys in our data.
+                columns = list(data.keys())
+                placeholders = ", ".join("?" for _ in columns)
+                sql = (
+                    f"INSERT INTO oncology_data ({', '.join(columns)}) "
+                    f"VALUES ({placeholders})"
                 )
+
+                values = tuple(data[col] for col in columns)
 
                 cursor.execute(sql, values)
                 return cursor.lastrowid
