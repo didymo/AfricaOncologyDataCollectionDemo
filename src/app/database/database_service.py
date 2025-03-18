@@ -2,6 +2,7 @@ import datetime
 import sqlite3
 import threading
 from contextlib import contextmanager
+from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -54,12 +55,17 @@ class DatabaseService:
             self._local.connection.close()
             del self._local.connection
 
-    def save_diagnosis_record(self, record_data: Dict) -> int:
+    def save_diagnosis_record(self, record_data) -> int:
         """
         Save a new record to the database.
         Supports data from Diagnosis, Follow Up, and Death screens.
         Returns the autoincrement ID of the inserted record.
         """
+
+        # If record_data is a dataclass instance, convert it to a dictionary.
+        if is_dataclass(record_data):
+            record_data = asdict(record_data)
+
         with self._lock:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
@@ -69,22 +75,22 @@ class DatabaseService:
 
                 # Mapping: canonical database column -> possible keys in record_data.
                 mapping = {
-                    "PatientID": ["PatientID", "Patient_ID"],
-                    "Event": ["Event"],
-                    "Event_Date": ["Event_Date"],
-                    "Diagnosis": ["Diagnosis"],
-                    "Histo": ["Histo"],
-                    "Grade": ["Grade"],
-                    "Factors": ["Factors"],
-                    "Stage": ["Stage"],
-                    "Careplan": ["Careplan", "Care_Plan"],
-                    "Note": ["Note"],
-                    "Death_Date": ["Death_Date"],
-                    "Death_Cause": ["Death_Cause"],
+                    "PatientID": ["patient_id"],
+                    "Event": ["event"],
+                    "Event_Date": ["event_date"],
+                    "Diagnosis": ["diagnosis"],
+                    "Histo": ["histo"],
+                    "Grade": ["grade"],
+                    "Factors": ["factors"],
+                    "Stage": ["stage"],
+                    "Careplan": ["careplan"],
+                    "Note": ["note"],
+                    "Death_Date": ["death_date"],  # if applicable
+                    "Death_Cause": ["death_cause"],  # if applicable
                 }
 
-                # For each canonical column, pick the first matching key
-                # from record_data.
+                # For each canonical column, pick the first matching key from
+                # record_data.
                 for col, keys in mapping.items():
                     for key in keys:
                         if key in record_data:
@@ -95,7 +101,7 @@ class DatabaseService:
                         # default to empty string.
                         data[col] = ""
 
-                # Build the INSERT statement dynamically based on the keys in our data.
+                # Build the INSERT statement dynamically.
                 columns = list(data.keys())
                 placeholders = ", ".join("?" for _ in columns)
                 sql = (

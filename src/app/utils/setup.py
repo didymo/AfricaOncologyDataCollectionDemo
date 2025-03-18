@@ -1,5 +1,5 @@
 # setup.py
-from src.app.utils.config import DATABASE_FILE, ConfigManager
+from app.utils.config import DATABASE_FILE, ConfigManager
 
 
 def check_initialization():
